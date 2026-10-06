@@ -1,98 +1,83 @@
-> **Start on Mac:** [MAC_LOCAL_SETUP.md](MAC_LOCAL_SETUP.md). **Public repository privacy:** [GITHUB_AND_PRIVACY.md](GITHUB_AND_PRIVACY.md). This repository contains neutral defaults and synthetic tests; no personal financial seed.
+# The Coin Fix
 
-> **Stellar Plus confirmado:** Namecheap ofrece Node en shared hosting. La afirmación anterior de que shared no ejecuta el backend es demasiado general. Consulta [DATABASE_AND_STELLAR_PLUS.md](DATABASE_AND_STELLAR_PLUS.md) para comprobar Node/SQLite, adaptador cPanel, instalación y ruta de escalabilidad.
+A local-first personal finance PWA built with React, TypeScript, Vite, Tailwind CSS and Dexie/IndexedDB. Spanish/English, four themes, responsive budgeting, cash-flow planning, debts, savings and optional shared budgets.
 
-> **Actualización v8:** ya existe presupuesto compartido opcional con permisos en servidor. Se activa explícitamente y añade datos financieros a SQLite. Consulta [SHARED_BUDGET.md](SHARED_BUDGET.md) para configuración, límites de registro en producción, permisos, conflictos y backups. Las referencias anteriores a ausencia de sincronización describen el modo local sin activar.
+**Start here:** [Mac setup, step by step](MAC_LOCAL_SETUP.md). This public repository has neutral app defaults and synthetic tests. It contains no personal financial seed, credentials or runtime database.
 
-# The Coin Fix · local-first personal finance
+## Run locally
 
-Aplicación PWA de finanzas personales con hogar configurable. React + TypeScript + Vite + Tailwind + Dexie. Español e inglés; oscuro verdadero predeterminado y tema claro. El modo local no necesita cuenta. Login y MFA usan un servidor de identidad independiente; no se necesita IA.
-
-## Empezar ahora
-
-Requisitos: Node.js 24.12.x–24.x y npm. Abre una terminal en esta carpeta:
+Requires Node 24.x, at least 24.12, and npm. SQLite is included with Node.
 
 ```sh
 npm ci
-# En una terminal:
+cp .env.example .env
+npm run db:check
+```
+
+In separate terminals, from this folder:
+
+```sh
 npm run auth
-# En otra terminal:
+```
+
+```sh
 npm run dev
 ```
 
-Abre la URL que imprime Vite (http://127.0.0.1:5175). Para una PWA con caché offline real:
+Open http://127.0.0.1:5175/. Servers bind only to loopback. A fresh clone contains no user accounts; see the Mac guide for registration or local owner bootstrap. Guest mode uses a separate budget.
 
-```sh
-npm run check
-npm run preview
-```
+## Features
 
-Abre http://127.0.0.1:4173 una vez con conexión. El service worker se habilita en el build de producción, no en desarrollo. `npm run preview` necesita primero `npm run build` (incluido en `check`). No abras index.html mediante file://.
+- Dashboard with received income, actual spending, cash flow, allocations and savings.
+- Transactions, manual accounts, GTQ/USD and historical transaction FX.
+- Budget cards, saved drag/keyboard ordering, separate category/group editors.
+- Income sources, scheduled receipts, recurring templates and cash-flow calendar.
+- Debts, optional installments, targeted payments and payoff simulations.
+- Savings, emergency and investment goals with contribution projections.
+- Editable household members and shared-budget administrator/contributor/expense-entry roles.
+- Validated JSON backup/import and CSV export.
+- Login, CAPTCHA, optional MFA and server-enforced shared permissions.
+- Offline PWA shell in production builds; manual FX works without external services.
 
-## Incluido
+## Commands
 
-- Inicio compacto: ingresos, consumo, flujo neto, porcentajes, gráficas y resumen de reservas; detalles financieros desplegables.
-- Movimientos: crear, editar, eliminar, buscar por mes; gastos, ingresos, transferencias, pagos y aportes. Exportación CSV.
-- Cuentas GTQ/USD con saldo inicial editable; tasas históricas por movimiento.
-- Presupuesto por categoría editable; montos originales y recortes documentados.
-- Recurrencias mensuales, semimensuales y cada dos meses; eventos manuales explícitos para cobros/pagos. No se inventan fechas.
-- Deudas, APR desconocido explícito, mínimos GTQ/USD, mora, pagos y simulador avalancha/bola de nieve.
-- Calendario mensual y saldo acumulado de eventos previstos. No equivale al saldo real.
-- Metas, fondo de emergencia, aportes e inversión; hogar genérico con integrantes y aportes previstos.
-- Respaldo JSON validado con SHA-256 y restauración atómica. Copia de seguridad previa a importar.
-- FX remoto sin clave, manual y último valor guardado; remoto desactivado por defecto.
-- PWA instalable, caché de aplicación, funcionamiento offline, almacenamiento IndexedDB.
-
-## Primera configuración
-
-1. En **Cuentas**, introduce los saldos iniciales reales. Los saldos iniciales precargados son Q0: no se inventa efectivo.
-2. Revisa **Deudas** con tus estados actuales. Los saldos son del contexto histórico, no saldos bancarios en vivo. Introduce APR y mínimos pendientes.
-3. Revisa **Presupuesto**: Define límites editables, incluyendo provisiones. Evita duplicar higiene y limpieza con supermercado.
-4. En **Calendario**, confirma los eventos de octubre. Registrar recepción abre un movimiento, que debes guardar. Fechas futuras no cuentan como dinero recibido hoy.
-5. Ajusta FX en **Ajustes** o consulta al proveedor voluntariamente. Q7.64136 es una referencia histórica, no cotización actual.
-6. Haz un respaldo antes y después de cambios importantes.
-
-## Comandos
-
-| Acción | Comando |
+| Purpose | Command |
 |---|---|
-| Dependencias reproducibles | `npm ci` |
-| Desarrollo local | `npm run dev` |
-| Pruebas financieras | `npm test` |
+| Install locked dependencies | `npm ci` |
+| Identity service | `npm run auth` |
+| Development UI | `npm run dev` |
+| SQLite readiness | `npm run db:check` |
+| Frontend/data tests | `npm test` |
+| Authentication/permissions tests | `npm run test:auth` |
 | Lint | `npm run lint` |
-| TypeScript y producción | `npm run build` |
-| Preview producción | `npm run preview` |
-| Todas las comprobaciones | `npm run check` |
-| Auditoría dependencias | `npm audit` |
-| Sólo riesgos runtime | `npm audit --omit=dev` |
-| Build para hosting público (sin seed privado) | `npm run build:public` |
-| Paquete compartido/cPanel | `cd dist-public && zip -r ../finanzas-static.zip .` |
+| All checks and build | `npm run check` |
+| Production build | `npm run build` |
+| Public hosting build | `npm run build:public` |
+| Build preview | `npm run preview -- --port 4173 --strictPort` |
 
-## Documentación
+Preview requires a build first and a separate auth origin configuration. Follow the Mac guide; 4173 has a different browser database from 5175.
 
-- [INCOME_AND_CASHFLOW.md](INCOME_AND_CASHFLOW.md): registro rápido, categorías, repetición, cobros y reparto por fechas.
+## Data and security
 
-- [TECH_STACK.md](TECH_STACK.md): herramientas, versiones y dónde cambiar cada parte.
-- [ARCHITECTURE.md](ARCHITECTURE.md): funcionamiento y extensión IA/sync.
-- [DATA_MODEL.md](DATA_MODEL.md): entidades, dinero, invariantes y contexto.
-- [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md): instalación, móvil, PWA y depuración.
-- [SECURITY.md](SECURITY.md): modelo de privacidad, límites, CSP y dependencias.
-- [DEPLOY_NAMECHEAP.md](DEPLOY_NAMECHEAP.md): shared/cPanel, DNS, SSL, VPS, actualizaciones y rollback.
-- [BACKUP_AND_RECOVERY.md](BACKUP_AND_RECOVERY.md): recuperación y portabilidad.
-- [CONTRIBUTING.md](CONTRIBUTING.md): cómo modificar y verificar.
-- [MULTI_USER.md](MULTI_USER.md): modo público actual y diseño seguro para registro, cuentas y sincronización.
+Browser IndexedDB stores private budgets by identity and origin. Login does not encrypt it. SQLite stores identity and optional shared-budget data. Shared mode must be activated explicitly; local records are otherwise not sent to the server. No telemetry or AI credentials are required. Remote FX is optional and disabled by default.
 
-## Límites honestos
+Keep .env, databases, MFA keys, real financial exports and screenshots out of Git. [GITHUB_AND_PRIVACY.md](GITHUB_AND_PRIVACY.md) explains the review process. A public repository does not deploy your application or upload local runtime data.
 
-Hay login, registro para pruebas locales y MFA; no hay sincronización entre dispositivos. El registro público en producción está bloqueado hasta integrar correo verificado y recuperación. Transferir un backup reemplaza la base destino. El build público neutro (`npm run build:public`) está diseñado para que otras personas usen la app sin recibir tu seed privado. No hay banca conectada, facturación, importación de estados CSV, sincronización remota, cifrado local ni proveedor IA implementado. CSV es exportación; JSON es el formato de importación. Los mínimos/calendarios no se actualizan automáticamente desde bancos. El simulador necesita tasas conocidas, omite cargos y usa APR/12. La ruta segura para registro y sync está documentada en MULTI_USER.md.
+Production registration remains blocked until verified email and recovery are implemented. This app does not connect to banks, execute real payments, import statement CSVs or implement an AI provider. JSON backups replace the destination budget. Unknown APRs cannot produce a reliable debt payoff forecast. Shared snapshots currently have size/concurrency limits documented in the architecture guide.
 
-- [AUTH_AND_SETUP.md](AUTH_AND_SETUP.md): instalación del servidor, SQLite, credenciales locales, MFA, CAPTCHA y límites reales.
-- [FINANCIAL_FEATURES.md](FINANCIAL_FEATURES.md): análisis del contexto y funciones propuestas para elegir.
+## Documentation
 
-## Presupuesto y simulaciones
+- [Mac installation and daily use](MAC_LOCAL_SETUP.md)
+- [Tech stack and compatibility](TECH_STACK.md)
+- [Architecture](ARCHITECTURE.md) and [data model](DATA_MODEL.md)
+- [Security](SECURITY.md), [authentication/MFA](AUTH_AND_SETUP.md)
+- [Backup and recovery](BACKUP_AND_RECOVERY.md)
+- [Shared budgets and roles](SHARED_BUDGET.md)
+- [Categories and groups](CATEGORY_MANAGEMENT.md)
+- [Income and cash flow](INCOME_AND_CASHFLOW.md)
+- [Budget and projections](BUDGET_AND_PROJECTIONS.md)
+- [Themes and installments](CATEGORIES_THEMES_AND_INSTALLMENTS.md)
+- [Namecheap deployment](DEPLOY_NAMECHEAP.md) and [Stellar Plus/database options](DATABASE_AND_STELLAR_PLUS.md)
+- [Contributing](CONTRIBUTING.md), [validation](VALIDATION.md), [feature proposals](FINANCIAL_FEATURES.md)
 
-Consulta [BUDGET_AND_PROJECTIONS.md](BUDGET_AND_PROJECTIONS.md) para los grupos, agenda recurrente, importación y supuestos de las proyecciones.
-
-## Organización, temas y cuotas
-
-[CATEGORIES_THEMES_AND_INSTALLMENTS.md](CATEGORIES_THEMES_AND_INSTALLMENTS.md) explica los grupos generales/específicos, Hogar configurable, resúmenes mensuales, cuatro temas y planes opcionales de capital. El login ahora solicita primero email/contraseña y completa CAPTCHA y MFA en etapas posteriores.
+Deploy to Namecheap only after local review. Upload the public build output, never the project root, identity database or environment files.
