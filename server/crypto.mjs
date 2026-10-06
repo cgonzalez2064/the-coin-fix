@@ -1,0 +1,12 @@
+import {randomBytes,scrypt, timingSafeEqual,createHmac,createHash,createCipheriv,createDecipheriv} from 'node:crypto';
+import {promisify} from 'node:util';
+const derive=promisify(scrypt);
+export const token=()=>randomBytes(32).toString('hex');
+export const digest=s=>createHash('sha256').update(s).digest('hex');
+export async function hashPassword(password){const salt=randomBytes(16).toString('hex');const hash=await derive(password,salt,64,{N:32768,r:8,p:3,maxmem:64*1024*1024});return `scrypt-v2:${salt}:${hash.toString('hex')}`;}
+export async function checkPassword(password,stored){const parts=stored.split(':');const modern=parts[0]==='scrypt-v2';const [salt,hash]=modern?parts.slice(1):parts;const actual=await derive(password,salt,64,{N:32768,r:8,p:modern?3:1,maxmem:64*1024*1024});return timingSafeEqual(actual,Buffer.from(hash,'hex'));}
+export function base32(bytes){let bits=0,value=0,result='';for(const byte of bytes){value=(value<<8)|byte;bits+=8;while(bits>=5){result+='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[(value>>>(bits-5))&31];bits-=5;}}if(bits)result+='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[(value<<(5-bits))&31];return result;}
+export function totp(secret,step=Math.floor(Date.now()/30000)){let bits=0,value=0;const bytes=[];for(const c of secret){value=(value<<5)|'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.indexOf(c);bits+=5;if(bits>=8){bytes.push((value>>>(bits-8))&255);bits-=8;}}const counter=Buffer.alloc(8);counter.writeBigUInt64BE(BigInt(step));const h=createHmac('sha1',Buffer.from(bytes)).update(counter).digest();const offset=h[19]&15;return String((h.readUInt32BE(offset)&0x7fffffff)%1000000).padStart(6,'0');}
+export function validStep(secret,code,last=-1,now=Date.now()){if(!/^\d{6}$/.test(code))return null;const current=Math.floor(now/30000);for(const step of [current-1,current,current+1])if(step>last&&timingSafeEqual(Buffer.from(totp(secret,step)),Buffer.from(code)))return step;return null;}
+export function encrypt(value,key){const iv=randomBytes(12);const cipher=createCipheriv('aes-256-gcm',key,iv);return [iv.toString('hex'),Buffer.concat([cipher.update(value,'utf8'),cipher.final()]).toString('hex'),cipher.getAuthTag().toString('hex')].join(':');}
+export function decrypt(value,key){const [iv,data,tag]=value.split(':');const cipher=createDecipheriv('aes-256-gcm',key,Buffer.from(iv,'hex'));cipher.setAuthTag(Buffer.from(tag,'hex'));return Buffer.concat([cipher.update(Buffer.from(data,'hex')),cipher.final()]).toString('utf8');}

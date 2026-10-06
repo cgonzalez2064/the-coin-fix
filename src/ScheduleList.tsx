@@ -1,0 +1,6 @@
+import {isSettled,scheduledEvents} from './cashflow';
+import {gtq,type Snapshot,type CashEvent} from './model';
+export function ScheduleList({data,month,es,money,onEdit,onRecord,onRemove}:{data:Snapshot;month:string;es:boolean;money:(n:number)=>string;onEdit:(e:CashEvent)=>void;onRecord:(e:CashEvent)=>void;onRemove:(e:CashEvent)=>void}){
+ const say=(a:string,b:string)=>es?a:b;
+ return <section className="card"><h3>{say('Compromisos y cobros programados','Scheduled commitments and receipts')}</h3>{scheduledEvents(data,month).map(e=><div className="row" key={e.id}><div className="grow"><strong>{e.name}</strong><small>{e.date||say('Sin fecha','Undated')} · {isSettled(data,e)?say('Registrado','Recorded'):e.status==='confirmed'?say('Previsto','Expected'):say('Pendiente','Pending')}</small></div><strong>{money(gtq(e.amount,e.currency,data.settings.fx))}</strong><button className="quiet" onClick={()=>onEdit(e)}>{say('Editar','Edit')}</button>{!isSettled(data,e)&&<button className="secondary" onClick={()=>onRecord(e)}>{e.flow==='income'?say('Recibido','Received'):say('Registrar gasto','Record expense')}</button>}<button className="quiet danger" onClick={()=>onRemove(e)}>{e.id.startsWith('schedule:')?say('Pausar','Pause'):say('Eliminar','Delete')}</button></div>)}</section>;
+}
